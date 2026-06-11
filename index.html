@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATR Studio — Cómputo Durlock</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root {
+  --red:    #D93B3B;
+  --carbon: #3A3832;
+  --taupe:  #8B7B72;
+  --cream:  #EDE8DF;
+  --white:  #FFFFFF;
+  --red-dark:   #b82e2e;
+  --red-light:  #f5e6e6;
+  --carbon-light: #5a5650;
+  --taupe-light: #c4b8b2;
+  --cream-dark: #d4cec5;
+  --success: #4a7c59;
+  --shadow: 0 2px 12px rgba(58,56,50,.10);
+  --shadow-lg: 0 8px 32px rgba(58,56,50,.16);
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Quicksand', sans-serif;
+  background: #f4f1ec;
+  color: var(--carbon);
+  min-height: 100vh;
+}
+
+/* ── HEADER ──────────────────────────────────────────────────────────────── */
+.header {
+  background: var(--carbon);
+  color: var(--cream);
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 16px rgba(0,0,0,.3);
+}
+.header-brand { display: flex; align-items: center; gap: 12px; }
+.header-logo {
+  width: 32px; height: 32px;
+  background: var(--red);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; color: white;
+  letter-spacing: -0.5px;
+}
+.header-title { font-size: 15px; font-weight: 700; letter-spacing: .5px; }
+.header-sub { font-size: 11px; color: var(--taupe-light); font-weight: 500; }
+.header-actions { display: flex; gap: 8px; align-items: center; }
+
+/* ── BUTTONS ──────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  font-family: 'Quicksand', sans-serif; font-weight: 600; font-size: 13px;
+  cursor: pointer; border: none; transition: all .18s ease;
+  text-decoration: none;
+}
+.btn-primary { background: var(--red); color: white; }
+.btn-primary:hover { background: var(--red-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(217,59,59,.35); }
+.btn-secondary { background: var(--cream); color: var(--carbon); }
+.btn-secondary:hover { background: var(--cream-dark); }
+.btn-ghost { background: rgba(255,255,255,.08); color: var(--cream); border: 1px solid rgba(255,255,255,.15); }
+.btn-ghost:hover { background: rgba(255,255,255,.15); }
+.btn-success { background: var(--success); color: white; }
+.btn-success:hover { background: #3d6b4a; transform: translateY(-1px); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
+
+/* ── LAYOUT ──────────────────────────────────────────────────────────────── */
+.container { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+.page-hero {
+  background: var(--carbon);
+  color: var(--cream);
+  padding: 28px 32px 24px;
+  margin-bottom: 28px;
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+}
+.page-hero h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.page-hero p { font-size: 13px; color: var(--taupe-light); }
+.hero-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,.1); color: var(--cream);
+  padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+}
+.badge-red { background: var(--red); }
+
+/* ── OBRA INFO ────────────────────────────────────────────────────────────── */
+.obra-card {
+  background: white; border-radius: var(--radius);
+  padding: 20px 24px; margin-bottom: 24px;
+  box-shadow: var(--shadow);
+  display: grid; grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 16px; align-items: end;
+}
+.field-group label { display: block; font-size: 11px; font-weight: 700; color: var(--taupe); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.field-group input, .field-group select {
+  width: 100%; padding: 9px 12px; border: 1.5px solid var(--cream-dark);
+  border-radius: var(--radius-sm); font-family: 'Quicksand', sans-serif;
+  font-size: 13px; font-weight: 600; color: var(--carbon);
+  background: var(--cream); transition: border-color .15s;
+}
+.field-group input:focus, .field-group select:focus {
+  outline: none; border-color: var(--red); background: white;
+}
+
+/* ── TABS ─────────────────────────────────────────────────────────────────── */
+.tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid var(--cream-dark); }
+.tab {
+  padding: 12px 24px; font-family: 'Quicksand', sans-serif; font-weight: 700;
+  font-size: 13px; cursor: pointer; border: none; background: none;
+  color: var(--taupe); border-bottom: 3px solid transparent;
+  margin-bottom: -2px; transition: all .18s; display: flex; align-items: center; gap: 7px;
+}
+.tab:hover { color: var(--carbon); }
+.tab.active { color: var(--red); border-bottom-color: var(--red); }
+.tab-icon { font-size: 15px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── SECCIÓN CÓMPUTO ─────────────────────────────────────────────────────── */
+.section-card {
+  background: white; border-radius: var(--radius);
+  box-shadow: var(--shadow); margin-bottom: 20px; overflow: hidden;
+}
+.section-header {
+  background: var(--carbon); color: var(--cream);
+  padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;
+}
+.section-header h3 { font-size: 13px; font-weight: 700; letter-spacing: .3px; display: flex; align-items: center; gap: 8px; }
+.section-badge {
+  background: var(--red); color: white; font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 10px; letter-spacing: .3px;
+}
+
+/* ── TABLE ────────────────────────────────────────────────────────────────── */
+.calc-table { width: 100%; border-collapse: collapse; }
+.calc-table thead tr { background: #2E4D8A; }
+.calc-table thead th {
+  padding: 10px 14px; font-size: 11px; font-weight: 700;
+  color: white; text-align: center; letter-spacing: .3px;
+  border-right: 1px solid rgba(255,255,255,.1);
+}
+.calc-table thead th:first-child { text-align: left; }
+.calc-table tbody tr { border-bottom: 1px solid #f0ece5; transition: background .12s; }
+.calc-table tbody tr:hover { background: #faf8f5; }
+.calc-table tbody td {
+  padding: 11px 14px; font-size: 13px; text-align: center;
+  border-right: 1px solid #f0ece5;
+}
+.calc-table tbody td:first-child { text-align: left; font-weight: 600; font-size: 12.5px; }
+.calc-table .subtotal-row { background: #e8f5ee !important; }
+.calc-table .subtotal-row td { font-weight: 700; color: #2d6a4a; font-size: 12px; }
+
+/* ── INPUT CELDA ─────────────────────────────────────────────────────────── */
+.m2-input {
+  width: 90px; padding: 7px 10px; border: 1.5px solid #e8c97a;
+  border-radius: var(--radius-sm); font-family: 'Quicksand', sans-serif;
+  font-size: 13px; font-weight: 700; color: var(--carbon);
+  background: #fffbee; text-align: center; transition: all .15s;
+}
+.m2-input:focus { outline: none; border-color: var(--red); background: white; box-shadow: 0 0 0 3px rgba(217,59,59,.1); }
+.calc-val { font-weight: 600; color: var(--carbon-light); }
+.calc-val.zero { color: #ccc; }
+
+/* ── CAJÓN ESPECIAL ──────────────────────────────────────────────────────── */
+.cajon-inputs { display: flex; align-items: center; gap: 8px; }
+.cajon-label { font-size: 11px; color: var(--taupe); font-weight: 600; white-space: nowrap; }
+
+/* ── RESUMEN ──────────────────────────────────────────────────────────────── */
+.resumen-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 20px; margin-top: 20px;
+}
+.resumen-table { width: 100%; border-collapse: collapse; }
+.resumen-table thead tr { background: #2E4D8A; }
+.resumen-table thead th { padding: 10px 14px; font-size: 11px; font-weight: 700; color: white; text-align: center; letter-spacing: .3px; }
+.resumen-table thead th:first-child { text-align: left; }
+.resumen-table tbody tr { border-bottom: 1px solid #f0ece5; }
+.resumen-table tbody tr:hover { background: #faf8f5; }
+.resumen-table tbody td { padding: 10px 14px; font-size: 13px; text-align: center; }
+.resumen-table tbody td:first-child { text-align: left; font-weight: 600; }
+.resumen-table .total-row { background: var(--carbon) !important; }
+.resumen-table .total-row td { color: white; font-weight: 700; font-size: 13px; }
+.price-cell { color: var(--taupe); font-size: 12px; }
+.total-cell { font-weight: 700; color: var(--carbon); }
+
+/* ── TOTAL BOX ────────────────────────────────────────────────────────────── */
+.total-box {
+  background: var(--carbon); color: var(--cream);
+  border-radius: var(--radius); padding: 24px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 20px;
+}
+.total-box .label { font-size: 13px; font-weight: 600; color: var(--taupe-light); margin-bottom: 4px; }
+.total-box .amount { font-size: 32px; font-weight: 700; color: white; }
+.total-box .sub { font-size: 11px; color: var(--taupe-light); margin-top: 2px; }
+
+/* ── PRECIOS TAB ─────────────────────────────────────────────────────────── */
+.precios-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+.precio-group {
+  background: white; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+}
+.precio-group-header {
+  background: var(--carbon); color: var(--cream);
+  padding: 10px 16px; font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+}
+.precio-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; border-bottom: 1px solid #f0ece5; gap: 12px;
+}
+.precio-row:last-child { border-bottom: none; }
+.precio-desc { font-size: 12.5px; font-weight: 600; flex: 1; }
+.precio-unit { font-size: 11px; color: var(--taupe); white-space: nowrap; }
+.precio-input {
+  width: 110px; padding: 7px 10px; border: 1.5px solid #e8c97a;
+  border-radius: var(--radius-sm); font-family: 'Quicksand', sans-serif;
+  font-size: 13px; font-weight: 700; color: var(--carbon);
+  background: #fffbee; text-align: right; transition: all .15s;
+}
+.precio-input:focus { outline: none; border-color: var(--red); background: white; box-shadow: 0 0 0 3px rgba(217,59,59,.1); }
+
+/* ── SAVE STATUS ──────────────────────────────────────────────────────────── */
+.save-status {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; color: var(--taupe-light);
+  transition: all .3s;
+}
+.save-status.saved { color: #6fcf97; }
+.save-status.saving { color: #f2c94c; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+/* ── TOAST ────────────────────────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 999;
+  background: var(--carbon); color: var(--cream);
+  padding: 12px 20px; border-radius: var(--radius);
+  font-size: 13px; font-weight: 600; box-shadow: var(--shadow-lg);
+  transform: translateY(80px); opacity: 0; transition: all .3s ease;
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { border-left: 4px solid #6fcf97; }
+.toast.error { border-left: 4px solid var(--red); }
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .obra-card { grid-template-columns: 1fr 1fr; }
+  .resumen-grid { grid-template-columns: 1fr; }
+  .container { padding: 16px; }
+  .header { padding: 0 16px; }
+  .calc-table { font-size: 11px; }
+  .m2-input { width: 70px; }
+}
+
+.spinner {
+  width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3);
+  border-top-color: white; border-radius: 50%;
+  animation: spin .7s linear infinite; display: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading .spinner { display: inline-block; }
+.loading .btn-text { display: none; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-brand">
+    <div class="header-logo">ATR</div>
+    <div>
+      <div class="header-title">ATR STUDIO</div>
+      <div class="header-sub">Cómputo de Materiales — Construcción en Seco</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <div class="save-status" id="saveStatus">
+      <div class="dot"></div>
+      <span>Sin cambios</span>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="exportPDF()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+      Exportar PDF
+    </button>
+    <button class="btn btn-ghost btn-sm" id="btnDrive" onclick="saveToDrive()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+      <span class="btn-text">Guardar</span>
+      <div class="spinner"></div>
+    </button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <div>
+      <h1>Cómputo de Materiales Durlock</h1>
+      <p>Calculá cantidades y costos de materiales para tabiques y cajones tipo L</p>
+      <div class="hero-meta">
+        <span class="badge badge-red">Tabique 1 cara</span>
+        <span class="badge">Tabique 2 caras</span>
+        <span class="badge">Cajón tipo L</span>
+        <span class="badge">Precios actualizables</span>
+      </div>
+    </div>
+    <button class="btn btn-secondary" onclick="resetAll()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Limpiar todo
+    </button>
+  </div>
+
+  <!-- OBRA INFO -->
+  <div class="obra-card">
+    <div class="field-group">
+      <label>Obra / Proyecto</label>
+      <input type="text" id="obraName" placeholder="Ej: Oficinas Moody's — Piso 16" oninput="markDirty()">
+    </div>
+    <div class="field-group">
+      <label>Dirección</label>
+      <input type="text" id="obraDireccion" placeholder="Butty 240, CABA" oninput="markDirty()">
+    </div>
+    <div class="field-group">
+      <label>Fecha</label>
+      <input type="date" id="obraFecha" oninput="markDirty()">
+    </div>
+    <button class="btn btn-primary" onclick="calcularTodo()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+      Calcular
+    </button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('computo')">
+      <span class="tab-icon">📐</span> Cómputo
+    </button>
+    <button class="tab" onclick="showTab('resumen')">
+      <span class="tab-icon">📊</span> Resumen &amp; Costos
+    </button>
+    <button class="tab" onclick="showTab('precios')">
+      <span class="tab-icon">💲</span> Lista de Precios
+    </button>
+  </div>
+
+  <!-- TAB: CÓMPUTO -->
+  <div class="tab-panel active" id="tab-computo">
+
+    <!-- TABIQUE 1 CARA -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3>📏 TABIQUE DE UNA CARA <span class="section-badge">4 tipologías</span></h3>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="calc-table">
+          <thead>
+            <tr>
+              <th style="min-width:220px">Tipo de tabique</th>
+              <th>M² a ejecutar</th>
+              <th>Placa (u)</th>
+              <th>Solera (ml)</th>
+              <th>Montante (ml)</th>
+              <th>T.Finer (u)</th>
+              <th>T.PMecha (u)</th>
+              <th>Masilla (kg)</th>
+              <th>Cinta (ml)</th>
+              <th>Lana (m²)</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-1c">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TABIQUE 2 CARAS -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3>📐 TABIQUE DE DOS CARAS <span class="section-badge">3 tipologías</span></h3>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="calc-table">
+          <thead>
+            <tr>
+              <th style="min-width:220px">Tipo de tabique</th>
+              <th>M² a ejecutar</th>
+              <th>Placa (u)</th>
+              <th>Solera (ml)</th>
+              <th>Montante (ml)</th>
+              <th>T.Finer (u)</th>
+              <th>T.PMecha (u)</th>
+              <th>Masilla (kg)</th>
+              <th>Cinta (ml)</th>
+              <th>Lana (m²)</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-2c">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CAJÓN TIPO L -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3>📦 CAJÓN TIPO L — Estructura 35mm, 1 cara, h=30cm</h3>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="calc-table">
+          <thead>
+            <tr>
+              <th style="min-width:240px">Tipo</th>
+              <th>Largo / Recorrido (ml)</th>
+              <th>M² Frontal</th>
+              <th>M² Base</th>
+              <th>Placa (u)</th>
+              <th>Solera 35mm (ml)</th>
+              <th>Montante 35mm (ml)</th>
+              <th>T.Finer (u)</th>
+              <th>T.PMecha (u)</th>
+              <th>Masilla (kg)</th>
+              <th>Cantonera (ml)</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-cajon">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /tab-computo -->
+
+  <!-- TAB: RESUMEN -->
+  <div class="tab-panel" id="tab-resumen">
+    <div class="section-card">
+      <div class="section-header">
+        <h3>📊 RESUMEN GENERAL DE MATERIALES</h3>
+      </div>
+      <div style="overflow-x:auto; padding:0">
+        <table class="resumen-table" id="resumenTable">
+          <thead>
+            <tr>
+              <th style="text-align:left;min-width:200px">Material</th>
+              <th>Unidad</th>
+              <th>Cantidad Total</th>
+              <th>P. Unitario</th>
+              <th>Total $</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-resumen">
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="total-box" id="totalBox">
+      <div>
+        <div class="label">TOTAL ESTIMADO DE MATERIALES</div>
+        <div class="amount" id="totalAmount">$ 0,00</div>
+        <div class="sub" id="totalSub">Precios netos s/IVA — Renew House</div>
+      </div>
+      <div style="text-align:right">
+        <div class="label">Obra</div>
+        <div style="font-size:15px;font-weight:700;color:white" id="totalObra">—</div>
+        <div class="label" style="margin-top:8px">Fecha</div>
+        <div style="font-size:13px;font-weight:600;color:var(--taupe-light)" id="totalFecha">—</div>
+      </div>
+    </div>
+  </div><!-- /tab-resumen -->
+
+  <!-- TAB: PRECIOS -->
+  <div class="tab-panel" id="tab-precios">
+    <div style="background:white;border-radius:var(--radius);padding:16px 20px;margin-bottom:20px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div>
+        <div style="font-weight:700;font-size:14px">Lista de Precios — Renew House</div>
+        <div style="font-size:12px;color:var(--taupe);margin-top:2px">Precios netos s/IVA. Actualizá cuando llegue nueva factura — el resumen se recalcula automáticamente.</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" onclick="saveToDrive()">💾 Guardar precios</button>
+      </div>
+    </div>
+    <div class="precios-grid" id="preciosGrid"></div>
+  </div><!-- /tab-precios -->
+
+</div><!-- /container -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATOS ───────────────────────────────────────────────────────────────────
+
+const TIPOS_1C = [
+  { label: "Tabique 1 cara — 70mm (sin aislación)",      rend: { placa:1.10, solera:2.10, mont:2.10, finer:12, pmecha:8, masilla:0.30, cinta:1.10, lana:0 } },
+  { label: "Tabique 1 cara — 70mm (con lana de vidrio)", rend: { placa:1.10, solera:2.10, mont:2.10, finer:12, pmecha:8, masilla:0.30, cinta:1.10, lana:1.05 } },
+  { label: "Tabique 1 cara — 35mm (sin aislación)",      rend: { placa:1.10, solera:2.10, mont:2.10, finer:12, pmecha:8, masilla:0.30, cinta:1.10, lana:0 } },
+  { label: "Tabique 1 cara — 35mm (con lana de vidrio)", rend: { placa:1.10, solera:2.10, mont:2.10, finer:12, pmecha:8, masilla:0.30, cinta:1.10, lana:1.05 } },
+];
+
+const TIPOS_2C = [
+  { label: "Tabique 2 caras — 70mm (sin aislación)",      rend: { placa:2.20, solera:2.10, mont:2.10, finer:20, pmecha:16, masilla:0.50, cinta:2.20, lana:0 } },
+  { label: "Tabique 2 caras — 70mm (con lana de vidrio)", rend: { placa:2.20, solera:2.10, mont:2.10, finer:20, pmecha:16, masilla:0.50, cinta:2.20, lana:1.05 } },
+  { label: "Tabique 2 caras — 70mm doble placa c/cara",   rend: { placa:4.40, solera:2.10, mont:2.10, finer:32, pmecha:24, masilla:0.80, cinta:4.40, lana:0 } },
+];
+
+// Precios iniciales (de facturas Renew House)
+let PRECIOS = {
+  placa:      14772.79,  // por u
+  solera70:   6285.49,   // por tira 2,60m
+  mont70:     6998.04,   // por tira 2,60m
+  solera35:   4571.83,   // por tira 2,60m
+  mont35:     5235.82,   // por tira 2,60m
+  finer:      9110.52,   // por millar (T-2)
+  pmecha:     25575.49,  // por millar (T-3)
+  masilla:    32227.44,  // por balde 32kg
+  cinta:      7952.00,   // por rollo 150m
+  lana:       27013.32,  // por panel 1,44m²
+  cantonera:  2686.92,   // por tira 2,60m
+};
+
+// Precios por unidad de la planilla
+function precioUnitario(key, tipo) {
+  if (tipo === '1c' || tipo === '2c') {
+    // solera/montante depende si es 35mm o 70mm
+    if (key === 'solera') return PRECIOS.solera70 / 2.6;
+    if (key === 'mont')   return PRECIOS.mont70 / 2.6;
+    if (key === 'finer')  return PRECIOS.finer / 1000;
+    if (key === 'pmecha') return PRECIOS.pmecha / 1000;
+    if (key === 'masilla')return PRECIOS.masilla / 32;
+    if (key === 'cinta')  return PRECIOS.cinta / 150;
+    if (key === 'lana')   return PRECIOS.lana / 1.44;
+    if (key === 'placa')  return PRECIOS.placa;
+  }
+  if (tipo === 'cajon') {
+    if (key === 'placa')    return PRECIOS.placa;
+    if (key === 'solera')   return PRECIOS.solera35 / 2.6;
+    if (key === 'mont')     return PRECIOS.mont35 / 2.6;
+    if (key === 'finer')    return PRECIOS.finer / 1000;
+    if (key === 'pmecha')   return PRECIOS.pmecha / 1000;
+    if (key === 'masilla')  return PRECIOS.masilla / 32;
+    if (key === 'cantonera')return PRECIOS.cantonera / 2.6;
+  }
+  return 0;
+}
+
+// Inputs
+let inputs1c = Array(4).fill(0);
+let inputs2c = Array(3).fill(0);
+let inputCajon = 0;
+
+// ─── INICIALIZAR TABLAS ───────────────────────────────────────────────────────
+function initTablas() {
+  // Tabique 1 cara
+  const tbody1c = document.getElementById('tbody-1c');
+  tbody1c.innerHTML = '';
+  TIPOS_1C.forEach((t, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${t.label}</td>
+      <td><input type="number" class="m2-input" id="i1c_${i}" value="0" min="0" step="0.1" oninput="calcularTodo()"></td>
+      <td class="calc-val" id="r1c_${i}_placa">0</td>
+      <td class="calc-val" id="r1c_${i}_solera">0</td>
+      <td class="calc-val" id="r1c_${i}_mont">0</td>
+      <td class="calc-val" id="r1c_${i}_finer">0</td>
+      <td class="calc-val" id="r1c_${i}_pmecha">0</td>
+      <td class="calc-val" id="r1c_${i}_masilla">0</td>
+      <td class="calc-val" id="r1c_${i}_cinta">0</td>
+      <td class="calc-val" id="r1c_${i}_lana">${t.rend.lana===0?'—':'0'}</td>
+    `;
+    tbody1c.appendChild(tr);
+  });
+  // Subtotal 1c
+  const trSub1c = document.createElement('tr');
+  trSub1c.className = 'subtotal-row';
+  trSub1c.innerHTML = `<td colspan="2">SUBTOTAL — 1 CARA</td>
+    <td id="sub1c_placa">0</td><td id="sub1c_solera">0</td><td id="sub1c_mont">0</td>
+    <td id="sub1c_finer">0</td><td id="sub1c_pmecha">0</td>
+    <td id="sub1c_masilla">0</td><td id="sub1c_cinta">0</td><td id="sub1c_lana">0</td>`;
+  tbody1c.appendChild(trSub1c);
+
+  // Tabique 2 caras
+  const tbody2c = document.getElementById('tbody-2c');
+  tbody2c.innerHTML = '';
+  TIPOS_2C.forEach((t, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${t.label}</td>
+      <td><input type="number" class="m2-input" id="i2c_${i}" value="0" min="0" step="0.1" oninput="calcularTodo()"></td>
+      <td class="calc-val" id="r2c_${i}_placa">0</td>
+      <td class="calc-val" id="r2c_${i}_solera">0</td>
+      <td class="calc-val" id="r2c_${i}_mont">0</td>
+      <td class="calc-val" id="r2c_${i}_finer">0</td>
+      <td class="calc-val" id="r2c_${i}_pmecha">0</td>
+      <td class="calc-val" id="r2c_${i}_masilla">0</td>
+      <td class="calc-val" id="r2c_${i}_cinta">0</td>
+      <td class="calc-val" id="r2c_${i}_lana">${t.rend.lana===0?'—':'0'}</td>
+    `;
+    tbody2c.appendChild(tr);
+  });
+  const trSub2c = document.createElement('tr');
+  trSub2c.className = 'subtotal-row';
+  trSub2c.innerHTML = `<td colspan="2">SUBTOTAL — 2 CARAS</td>
+    <td id="sub2c_placa">0</td><td id="sub2c_solera">0</td><td id="sub2c_mont">0</td>
+    <td id="sub2c_finer">0</td><td id="sub2c_pmecha">0</td>
+    <td id="sub2c_masilla">0</td><td id="sub2c_cinta">0</td><td id="sub2c_lana">0</td>`;
+  tbody2c.appendChild(trSub2c);
+
+  // Cajón
+  const tbodyCajon = document.getElementById('tbody-cajon');
+  tbodyCajon.innerHTML = `
+    <tr>
+      <td>Cajón tipo L (cara frontal + cara base)</td>
+      <td><input type="number" class="m2-input" id="i_cajon" value="0" min="0" step="0.1" oninput="calcularTodo()"></td>
+      <td class="calc-val" id="rc_frontal">0,00</td>
+      <td class="calc-val" id="rc_base">0,00</td>
+      <td class="calc-val" id="rc_placa">0</td>
+      <td class="calc-val" id="rc_solera">0</td>
+      <td class="calc-val" id="rc_mont">0</td>
+      <td class="calc-val" id="rc_finer">0</td>
+      <td class="calc-val" id="rc_pmecha">0</td>
+      <td class="calc-val" id="rc_masilla">0</td>
+      <td class="calc-val" id="rc_cantonera">0</td>
+    </tr>
+    <tr class="subtotal-row">
+      <td colspan="2">SUBTOTAL — CAJÓN TIPO L</td>
+      <td id="subc_frontal">0,00</td><td id="subc_base">0,00</td>
+      <td id="subc_placa">0</td><td id="subc_solera">0</td><td id="subc_mont">0</td>
+      <td id="subc_finer">0</td><td id="subc_pmecha">0</td>
+      <td id="subc_masilla">0</td><td id="subc_cantonera">0</td>
+    </tr>`;
+}
+
+// ─── CALCULAR ────────────────────────────────────────────────────────────────
+function calcularTodo() {
+  markDirty();
+  // Totales acumulados
+  let tot = { placa:0, solera70:0, mont70:0, solera35:0, mont35:0, finer:0, pmecha:0, masilla:0, cinta:0, lana:0, cantonera:0 };
+
+  // 1 cara
+  let sub1c = { placa:0, solera:0, mont:0, finer:0, pmecha:0, masilla:0, cinta:0, lana:0 };
+  TIPOS_1C.forEach((t, i) => {
+    const m2 = parseFloat(document.getElementById(`i1c_${i}`).value) || 0;
+    const r = t.rend;
+    const vals = {
+      placa:   Math.ceil(m2 * r.placa),
+      solera:  Math.ceil(m2 * r.solera),
+      mont:    Math.ceil(m2 * r.mont),
+      finer:   Math.ceil(m2 * r.finer),
+      pmecha:  Math.ceil(m2 * r.pmecha),
+      masilla: Math.round(m2 * r.masilla * 10) / 10,
+      cinta:   Math.round(m2 * r.cinta * 10) / 10,
+      lana:    r.lana > 0 ? Math.round(m2 * r.lana * 10) / 10 : null,
+    };
+    Object.keys(vals).forEach(k => {
+      const el = document.getElementById(`r1c_${i}_${k}`);
+      if (!el) return;
+      if (vals[k] === null) { el.textContent = '—'; el.className = 'calc-val'; return; }
+      el.textContent = fmt(vals[k]);
+      el.className = vals[k] === 0 ? 'calc-val zero' : 'calc-val';
+      sub1c[k] = (sub1c[k] || 0) + (vals[k] || 0);
+    });
+    // Acumular totales (35mm vs 70mm)
+    const is35 = t.label.includes('35mm');
+    tot.placa   += vals.placa;
+    tot.finer   += vals.finer;
+    tot.pmecha  += vals.pmecha;
+    tot.masilla += vals.masilla;
+    tot.cinta   += vals.cinta;
+    if (r.lana > 0) tot.lana += (vals.lana || 0);
+    if (is35) { tot.solera35 += vals.solera; tot.mont35 += vals.mont; }
+    else       { tot.solera70 += vals.solera; tot.mont70 += vals.mont; }
+  });
+  Object.keys(sub1c).forEach(k => {
+    const el = document.getElementById(`sub1c_${k}`);
+    if (el) el.textContent = fmt(sub1c[k]);
+  });
+
+  // 2 caras
+  let sub2c = { placa:0, solera:0, mont:0, finer:0, pmecha:0, masilla:0, cinta:0, lana:0 };
+  TIPOS_2C.forEach((t, i) => {
+    const m2 = parseFloat(document.getElementById(`i2c_${i}`).value) || 0;
+    const r = t.rend;
+    const vals = {
+      placa:   Math.ceil(m2 * r.placa),
+      solera:  Math.ceil(m2 * r.solera),
+      mont:    Math.ceil(m2 * r.mont),
+      finer:   Math.ceil(m2 * r.finer),
+      pmecha:  Math.ceil(m2 * r.pmecha),
+      masilla: Math.round(m2 * r.masilla * 10) / 10,
+      cinta:   Math.round(m2 * r.cinta * 10) / 10,
+      lana:    r.lana > 0 ? Math.round(m2 * r.lana * 10) / 10 : null,
+    };
+    Object.keys(vals).forEach(k => {
+      const el = document.getElementById(`r2c_${i}_${k}`);
+      if (!el) return;
+      if (vals[k] === null) { el.textContent = '—'; el.className = 'calc-val'; return; }
+      el.textContent = fmt(vals[k]);
+      el.className = vals[k] === 0 ? 'calc-val zero' : 'calc-val';
+      sub2c[k] = (sub2c[k] || 0) + (vals[k] || 0);
+    });
+    tot.placa   += vals.placa;
+    tot.finer   += vals.finer;
+    tot.pmecha  += vals.pmecha;
+    tot.masilla += vals.masilla;
+    tot.cinta   += vals.cinta;
+    if (r.lana > 0) tot.lana += (vals.lana || 0);
+    tot.solera70 += vals.solera;
+    tot.mont70   += vals.mont;
+  });
+  Object.keys(sub2c).forEach(k => {
+    const el = document.getElementById(`sub2c_${k}`);
+    if (el) el.textContent = fmt(sub2c[k]);
+  });
+
+  // Cajón
+  const largo = parseFloat(document.getElementById('i_cajon').value) || 0;
+  const m2Frontal = Math.round(largo * 0.3 * 100) / 100;
+  const m2Base    = Math.round(largo * 0.3 * 100) / 100;
+  const m2Total   = m2Frontal + m2Base;
+  const cajVal = {
+    frontal:   m2Frontal,
+    base:      m2Base,
+    placa:     Math.ceil(m2Total * 0.36),
+    solera:    Math.ceil(m2Total * 6.67),
+    mont:      Math.ceil(m2Total * 2.8),
+    finer:     Math.ceil(m2Total * 8),
+    pmecha:    Math.ceil(m2Total * 4),
+    masilla:   Math.round(m2Total * 0.15 * 10) / 10,
+    cantonera: Math.round(largo * 10) / 10,
+  };
+  Object.keys(cajVal).forEach(k => {
+    const el = document.getElementById(`rc_${k}`);
+    if (el) { el.textContent = fmt(cajVal[k]); el.className = cajVal[k] === 0 ? 'calc-val zero' : 'calc-val'; }
+    const els = document.getElementById(`subc_${k}`);
+    if (els) { els.textContent = fmt(cajVal[k]); }
+  });
+  tot.placa     += cajVal.placa;
+  tot.solera35  += cajVal.solera;
+  tot.mont35    += cajVal.mont;
+  tot.finer     += cajVal.finer;
+  tot.pmecha    += cajVal.pmecha;
+  tot.masilla   += cajVal.masilla;
+  tot.cantonera += cajVal.cantonera;
+
+  // Actualizar resumen
+  actualizarResumen(tot);
+}
+
+function fmt(n) {
+  if (n === null || n === undefined) return '—';
+  if (Number.isInteger(n)) return n.toLocaleString('es-AR');
+  return n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtPeso(n) {
+  return '$ ' + n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ─── RESUMEN ─────────────────────────────────────────────────────────────────
+function actualizarResumen(tot) {
+  const filas = [
+    { label:"Placa estándar (Durlock/Knauf 12,5mm)", unidad:"u",  cant: tot.placa,     pKey:'placa',    tipo:'1c' },
+    { label:"Perfil Solera 70mm",                    unidad:"ml", cant: tot.solera70,  pKey:'solera',   tipo:'1c' },
+    { label:"Perfil Solera 35mm  (cajón tipo L)",    unidad:"ml", cant: tot.solera35,  pKey:'solera',   tipo:'cajon' },
+    { label:"Perfil Montante 70mm",                  unidad:"ml", cant: tot.mont70,    pKey:'mont',     tipo:'1c' },
+    { label:"Perfil Montante 35mm  (cajón tipo L)",  unidad:"ml", cant: tot.mont35,    pKey:'mont',     tipo:'cajon' },
+    { label:"Tornillos Finer T-2 (x1000u)",          unidad:"u",  cant: tot.finer,     pKey:'finer',    tipo:'1c' },
+    { label:"Tornillos Punta Mecha T-3 (x1000u)",    unidad:"u",  cant: tot.pmecha,    pKey:'pmecha',   tipo:'1c' },
+    { label:"Masilla para juntas",                   unidad:"kg", cant: tot.masilla,   pKey:'masilla',  tipo:'1c' },
+    { label:"Cinta de papel (junta)",                unidad:"ml", cant: tot.cinta,     pKey:'cinta',    tipo:'1c' },
+    { label:"Lana de vidrio 50mm",                   unidad:"m²", cant: tot.lana,      pKey:'lana',     tipo:'1c' },
+    { label:"Cantonera metálica",                    unidad:"ml", cant: tot.cantonera, pKey:'cantonera',tipo:'cajon' },
+  ];
+
+  const tbody = document.getElementById('tbody-resumen');
+  tbody.innerHTML = '';
+  let totalGeneral = 0;
+
+  filas.forEach(f => {
+    const pu  = precioUnitario(f.pKey, f.tipo);
+    const total = f.cant * pu;
+    totalGeneral += total;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${f.label}</td>
+      <td>${f.unidad}</td>
+      <td><strong>${fmt(f.cant)}</strong></td>
+      <td class="price-cell">${fmtPeso(pu)}</td>
+      <td class="total-cell" style="color:${total>0?'var(--carbon)':'#ccc'}">${fmtPeso(total)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Fila total
+  const trTot = document.createElement('tr');
+  trTot.className = 'total-row';
+  trTot.innerHTML = `<td colspan="4" style="text-align:right;padding-right:16px">TOTAL ESTIMADO</td><td>${fmtPeso(totalGeneral)}</td>`;
+  tbody.appendChild(trTot);
+
+  document.getElementById('totalAmount').textContent = fmtPeso(totalGeneral);
+  document.getElementById('totalObra').textContent = document.getElementById('obraName').value || '—';
+  document.getElementById('totalFecha').textContent = document.getElementById('obraFecha').value || '—';
+}
+
+// ─── PRECIOS PANEL ────────────────────────────────────────────────────────────
+const GRUPOS_PRECIOS = [
+  { titulo: "PLACAS", items: [
+    { key:'placa', label:'Placa Knauf ST 12,5mm 1,20×2,40', unidad:'por unidad' },
+  ]},
+  { titulo: "PERFILES 70mm", items: [
+    { key:'solera70', label:'Perfil Solera 70mm (tira 2,60m)', unidad:'por tira' },
+    { key:'mont70',   label:'Perfil Montante 70mm (tira 2,60m)', unidad:'por tira' },
+  ]},
+  { titulo: "PERFILES 35mm", items: [
+    { key:'solera35', label:'Perfil Solera 35mm (tira 2,60m)', unidad:'por tira' },
+    { key:'mont35',   label:'Perfil Montante 35mm (tira 2,60m)', unidad:'por tira' },
+  ]},
+  { titulo: "TORNILLOS", items: [
+    { key:'finer',  label:'Tornillo T-2 Aguja 6×1" (x1000u)', unidad:'por millar' },
+    { key:'pmecha', label:'Tornillo T-3 Aguja 6×1 5/8" (x1000u)', unidad:'por millar' },
+  ]},
+  { titulo: "MASILLA / CINTA / LANA", items: [
+    { key:'masilla', label:'Masilla Plástica Anclaflex 32kg', unidad:'por balde 32kg' },
+    { key:'cinta',   label:'Cinta de Papel Microperforada 150m', unidad:'por rollo 150m' },
+    { key:'lana',    label:'Acustiver P sin velo 50mm 1,20×1,20', unidad:'por panel 1,44m²' },
+  ]},
+  { titulo: "CANTONERA", items: [
+    { key:'cantonera', label:'Cantonera Metálica (tira 2,60m)', unidad:'por tira 2,60m' },
+  ]},
+];
+
+function initPrecios() {
+  const grid = document.getElementById('preciosGrid');
+  grid.innerHTML = '';
+  GRUPOS_PRECIOS.forEach(g => {
+    const div = document.createElement('div');
+    div.className = 'precio-group';
+    div.innerHTML = `<div class="precio-group-header">${g.titulo}</div>`;
+    g.items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'precio-row';
+      row.innerHTML = `
+        <div>
+          <div class="precio-desc">${item.label}</div>
+          <div class="precio-unit">${item.unidad}</div>
+        </div>
+        <input type="number" class="precio-input" id="p_${item.key}"
+               value="${PRECIOS[item.key]}"
+               step="0.01" min="0"
+               oninput="updatePrecio('${item.key}', this.value)">
+      `;
+      div.appendChild(row);
+    });
+    grid.appendChild(div);
+  });
+}
+
+function updatePrecio(key, val) {
+  PRECIOS[key] = parseFloat(val) || 0;
+  calcularTodo();
+  markDirty();
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function showTab(id) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`tab-${id}`).classList.add('active');
+  const tabs = document.querySelectorAll('.tab');
+  const map = { computo:0, resumen:1, precios:2 };
+  tabs[map[id]].classList.add('active');
+  if (id === 'resumen') calcularTodo();
+}
+
+// ─── RESET ────────────────────────────────────────────────────────────────────
+function resetAll() {
+  if (!confirm('¿Limpiar todos los valores?')) return;
+  document.querySelectorAll('.m2-input').forEach(el => el.value = 0);
+  document.getElementById('i_cajon').value = 0;
+  calcularTodo();
+}
+
+// ─── SAVE STATUS ──────────────────────────────────────────────────────────────
+let dirty = false;
+function markDirty() {
+  dirty = true;
+  const s = document.getElementById('saveStatus');
+  s.className = 'save-status saving';
+  s.innerHTML = '<div class="dot"></div><span>Sin guardar</span>';
+}
+function markSaved() {
+  dirty = false;
+  const s = document.getElementById('saveStatus');
+  s.className = 'save-status saved';
+  s.innerHTML = '<div class="dot"></div><span>Guardado ✓</span>';
+  setTimeout(() => {
+    s.className = 'save-status';
+    s.innerHTML = '<div class="dot"></div><span>Sin cambios</span>';
+  }, 3000);
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = (type==='success'?'✓ ':type==='error'?'✕ ':'') + msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ─── GOOGLE DRIVE ─────────────────────────────────────────────────────────────
+const CLIENT_ID = '267420121557-6d8b3912u4jbmjf25152ad4pborqre7f.apps.googleusercontent.com';
+const SCOPES    = 'https://www.googleapis.com/auth/drive.file';
+const FILE_NAME = 'atr-durlock-data.json';
+let driveFileId = null;
+let tokenClient = null;
+let gapiReady   = false;
+
+function getState() {
+  const rows1c = TIPOS_1C.map((_, i) => parseFloat(document.getElementById(`i1c_${i}`)?.value)||0);
+  const rows2c = TIPOS_2C.map((_, i) => parseFloat(document.getElementById(`i2c_${i}`)?.value)||0);
+  return {
+    obra: document.getElementById('obraName').value,
+    direccion: document.getElementById('obraDireccion').value,
+    fecha: document.getElementById('obraFecha').value,
+    inputs1c: rows1c,
+    inputs2c: rows2c,
+    inputCajon: parseFloat(document.getElementById('i_cajon')?.value)||0,
+    precios: PRECIOS,
+    savedAt: new Date().toISOString(),
+  };
+}
+
+function loadState(state) {
+  if (!state) return;
+  if (state.obra)     document.getElementById('obraName').value      = state.obra;
+  if (state.direccion)document.getElementById('obraDireccion').value = state.direccion;
+  if (state.fecha)    document.getElementById('obraFecha').value     = state.fecha;
+  if (state.inputs1c) state.inputs1c.forEach((v,i) => { const el = document.getElementById(`i1c_${i}`); if(el) el.value=v; });
+  if (state.inputs2c) state.inputs2c.forEach((v,i) => { const el = document.getElementById(`i2c_${i}`); if(el) el.value=v; });
+  if (state.inputCajon !== undefined) { const el = document.getElementById('i_cajon'); if(el) el.value = state.inputCajon; }
+  if (state.precios) {
+    Object.assign(PRECIOS, state.precios);
+    initPrecios();
+  }
+  calcularTodo();
+}
+
+async function saveToDrive() {
+  const btn = document.getElementById('btnDrive');
+  btn.classList.add('loading'); btn.disabled = true;
+  try {
+    await ensureAuth();
+    const content = JSON.stringify(getState(), null, 2);
+    if (driveFileId) {
+      await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`, {
+        method:'PATCH', headers:{'Content-Type':'application/json','Authorization':`Bearer ${gapi.client.getToken().access_token}`}, body:content
+      });
+    } else {
+      const meta = await gapi.client.drive.files.list({ q:`name='${FILE_NAME}' and trashed=false`, fields:'files(id)' });
+      const files = meta.result.files;
+      if (files && files.length > 0) {
+        driveFileId = files[0].id;
+        await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`, {
+          method:'PATCH', headers:{'Content-Type':'application/json','Authorization':`Bearer ${gapi.client.getToken().access_token}`}, body:content
+        });
+      } else {
+        const boundary = '-------314159265358979323846';
+        const body = `--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify({name:FILE_NAME,mimeType:'application/json'})}\r\n--${boundary}\r\nContent-Type: application/json\r\n\r\n${content}\r\n--${boundary}--`;
+        const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+          method:'POST', headers:{'Content-Type':`multipart/related; boundary=${boundary}`,'Authorization':`Bearer ${gapi.client.getToken().access_token}`}, body
+        });
+        const json = await res.json();
+        driveFileId = json.id;
+      }
+    }
+    markSaved();
+    showToast('Guardado en Google Drive ✓');
+  } catch(e) {
+    showToast('Error al guardar: ' + e.message, 'error');
+    console.error(e);
+  }
+  btn.classList.remove('loading'); btn.disabled = false;
+}
+
+async function loadFromDrive() {
+  try {
+    await ensureAuth();
+    const meta = await gapi.client.drive.files.list({ q:`name='${FILE_NAME}' and trashed=false`, fields:'files(id)' });
+    const files = meta.result.files;
+    if (!files || files.length === 0) return;
+    driveFileId = files[0].id;
+    const res = await gapi.client.drive.files.get({ fileId:driveFileId, alt:'media' });
+    loadState(JSON.parse(res.body));
+    showToast('Datos cargados desde Drive');
+    markSaved();
+  } catch(e) { console.log('Sin datos previos en Drive'); }
+}
+
+function ensureAuth() {
+  return new Promise((resolve, reject) => {
+    if (!gapiReady) { reject(new Error('API no lista')); return; }
+    const token = gapi.client.getToken();
+    if (token) { resolve(); return; }
+    tokenClient.callback = (resp) => resp.error ? reject(new Error(resp.error)) : resolve();
+    tokenClient.requestAccessToken({ prompt:'' });
+  });
+}
+
+function gapiLoaded() {
+  gapi.load('client', async () => {
+    await gapi.client.init({ discoveryDocs:['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'] });
+    gapiReady = true;
+    await loadFromDrive();
+  });
+}
+function gisLoaded() {
+  tokenClient = google.accounts.oauth2.initTokenClient({ client_id:CLIENT_ID, scope:SCOPES, callback:'' });
+}
+
+// ─── EXPORT PDF ───────────────────────────────────────────────────────────────
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+
+  // Header
+  doc.setFillColor(58, 56, 50);
+  doc.rect(0, 0, 297, 22, 'F');
+  doc.setTextColor(237, 232, 223);
+  doc.setFontSize(14); doc.setFont('helvetica','bold');
+  doc.text('ATR STUDIO — Cómputo de Materiales Durlock', 14, 10);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  const obra = document.getElementById('obraName').value || 'Sin nombre';
+  const fecha = document.getElementById('obraFecha').value || new Date().toLocaleDateString('es-AR');
+  doc.text(`Obra: ${obra}   |   Fecha: ${fecha}`, 14, 17);
+
+  // Resumen table
+  const rows = [];
+  document.querySelectorAll('#tbody-resumen tr:not(.total-row)').forEach(tr => {
+    const cells = tr.querySelectorAll('td');
+    if (cells.length >= 5)
+      rows.push([cells[0].textContent, cells[1].textContent, cells[2].textContent, cells[3].textContent, cells[4].textContent]);
+  });
+
+  doc.autoTable({
+    startY: 28,
+    head: [['Material', 'Unidad', 'Cantidad', 'P. Unitario', 'Total $']],
+    body: rows,
+    theme: 'grid',
+    headStyles: { fillColor:[46,77,138], textColor:255, fontSize:9, fontStyle:'bold' },
+    bodyStyles: { fontSize:9 },
+    alternateRowStyles: { fillColor:[248,246,242] },
+    columnStyles: { 0:{cellWidth:80}, 1:{halign:'center'}, 2:{halign:'center'}, 3:{halign:'right'}, 4:{halign:'right', fontStyle:'bold'} },
+  });
+
+  // Total
+  const totalY = doc.lastAutoTable.finalY + 6;
+  const total = document.getElementById('totalAmount').textContent;
+  doc.setFillColor(58,56,50);
+  doc.rect(14, totalY, 269, 10, 'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(11); doc.setFont('helvetica','bold');
+  doc.text('TOTAL ESTIMADO', 20, totalY+7);
+  doc.text(total, 283, totalY+7, {align:'right'});
+
+  doc.save(`ATR_Durlock_${obra.replace(/\s+/g,'_')}.pdf`);
+  showToast('PDF exportado correctamente');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('obraFecha').value = new Date().toISOString().split('T')[0];
+  initTablas();
+  initPrecios();
+  calcularTodo();
+});
+</script>
+
+<!-- Google APIs -->
+<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
+</body>
+</html>
