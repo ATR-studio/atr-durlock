@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATR Studio — Cómputo Durlock</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root {
+  --red:#D93B3B; --carbon:#3A3832; --taupe:#8B7B72; --cream:#EDE8DF;
+  --red-dark:#b82e2e; --cream-dark:#d4cec5; --taupe-light:#c4b8b2;
+  --success:#4a7c59; --shadow:0 2px 12px rgba(58,56,50,.10);
+  --shadow-lg:0 8px 32px rgba(58,56,50,.16); --radius:10px; --radius-sm:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Quicksand',sans-serif;background:#f4f1ec;color:var(--carbon);min-height:100vh}
+.view{display:none}.view.active{display:block}
+/* HEADER */
+.hdr{background:var(--carbon);color:var(--cream);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.3)}
+.logo{width:32px;height:32px;background:var(--red);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;flex-shrink:0}
+.hdr-brand{display:flex;align-items:center;gap:10px}
+.hdr-title{font-size:15px;font-weight:700;letter-spacing:.5px}
+.hdr-sub{font-size:11px;color:var(--taupe-light)}
+.hdr-actions{display:flex;gap:8px;align-items:center}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;cursor:pointer;border:none;transition:all .18s}
+.btn-primary{background:var(--red);color:#fff}.btn-primary:hover{background:var(--red-dark);transform:translateY(-1px)}
+.btn-secondary{background:var(--cream);color:var(--carbon)}.btn-secondary:hover{background:var(--cream-dark)}
+.btn-ghost{background:rgba(255,255,255,.08);color:var(--cream);border:1px solid rgba(255,255,255,.15)}.btn-ghost:hover{background:rgba(255,255,255,.15)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-loading .spinner{display:inline-block}.btn-loading .btn-text{display:none}
+/* LAYOUT */
+.container{max-width:1200px;margin:0 auto;padding:24px}
+/* DASHBOARD */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.kpi{background:#fff;border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);border-left:4px solid transparent}
+.kpi.k-total{border-left-color:var(--red)}.kpi.k-p{border-left-color:#8B7B72}.kpi.k-a{border-left-color:#2E86AB}.kpi.k-eo{border-left-color:#F4A261}
+.kpi-lbl{font-size:10px;font-weight:700;color:var(--taupe);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.kpi-val{font-size:26px;font-weight:700;color:var(--carbon);line-height:1}
+.kpi-sub{font-size:11px;color:var(--taupe);margin-top:4px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+.search{padding:8px 14px;border:1.5px solid var(--cream-dark);border-radius:var(--radius-sm);font-family:'Quicksand',sans-serif;font-size:13px;color:var(--carbon);background:#fff;width:200px}
+.search:focus{outline:none;border-color:var(--red)}
+.fbtn{padding:6px 13px;border-radius:20px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--cream-dark);background:#fff;color:var(--taupe);transition:all .15s}
+.fbtn.active,.fbtn:hover{border-color:var(--red);color:var(--red);background:#fdf0f0}
+.obras-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.ocard{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:all .18s;border:2px solid transparent}
+.ocard:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:var(--red)}
+.ocard-top{padding:14px 16px 10px;border-bottom:1px solid #f0ece5;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.ocard-nombre{font-size:13px;font-weight:700;color:var(--carbon);margin-bottom:2px}
+.ocard-dir{font-size:11px;color:var(--taupe)}
+.pill{padding:3px 9px;border-radius:12px;font-size:10px;font-weight:700;white-space:nowrap}
+.pill-p{background:#f0ece5;color:#8B7B72}.pill-a{background:#e3f0f7;color:#2E86AB}
+.pill-eo{background:#fef3e8;color:#e07b2a}.pill-f{background:#e8f5ee;color:#4a7c59}
+.ocard-body{padding:10px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.ostat-lbl{font-size:10px;color:var(--taupe);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.ostat-val{font-size:14px;font-weight:700;color:var(--carbon)}
+.ocard-foot{padding:8px 16px;background:#faf8f5;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0ece5}
+.empty{grid-column:1/-1;text-align:center;padding:60px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);color:var(--taupe)}
+.empty-icon{font-size:44px;margin-bottom:10px}
+.empty h3{font-size:15px;font-weight:700;color:var(--carbon);margin-bottom:4px}
+/* OBRA VIEW */
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--taupe-light);cursor:pointer;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:var(--radius-sm);padding:6px 12px;transition:all .15s}
+.back-btn:hover{color:#fff;background:rgba(255,255,255,.15)}
+.divider{width:1px;height:24px;background:rgba(255,255,255,.2);margin:0 6px}
+.status-sel{padding:6px 12px;border-radius:20px;font-family:'Quicksand',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border:2px solid;transition:all .15s;-webkit-appearance:none}
+.status-sel.sp{border-color:#8B7B72;color:#8B7B72;background:#f0ece5}
+.status-sel.sa{border-color:#2E86AB;color:#2E86AB;background:#e3f0f7}
+.status-sel.seo{border-color:#e07b2a;color:#e07b2a;background:#fef3e8}
+.status-sel.sf{border-color:#4a7c59;color:#4a7c59;background:#e8f5ee}
+.save-st{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--taupe-light)}
+.save-st.saved{color:#6fcf97}.save-st.unsaved{color:#f2c94c}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+/* HERO */
+.hero{background:var(--carbon);color:var(--cream);padding:22px 26px;border-radius:var(--radius);margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.hero h1{font-size:20px;font-weight:700;margin-bottom:3px}
+.hero p{font-size:12px;color:var(--taupe-light)}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.badge{display:inline-flex;align-items:center;background:rgba(255,255,255,.1);color:var(--cream);padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-red{background:var(--red)}
+/* OBRA INFO */
+.obra-info{background:#fff;border-radius:var(--radius);padding:16px 20px;margin-bottom:18px;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:14px;align-items:end}
+.fg label{display:block;font-size:10px;font-weight:700;color:var(--taupe);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.fg input,.fg select{width:100%;padding:8px 11px;border:1.5px solid var(--cream-dark);border-radius:var(--radius-sm);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:600;color:var(--carbon);background:var(--cream)}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--red);background:#fff}
+/* TABS */
+.tabs{display:flex;gap:0;margin-bottom:18px;border-bottom:2px solid var(--cream-dark)}
+.tab{padding:11px 22px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;cursor:pointer;border:none;background:none;color:var(--taupe);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .18s;display:flex;align-items:center;gap:6px}
+.tab:hover{color:var(--carbon)}.tab.active{color:var(--red);border-bottom-color:var(--red)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+/* TABLES */
+.section-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+.sec-hdr{background:var(--carbon);color:var(--cream);padding:12px 18px;display:flex;align-items:center;gap:10px}
+.sec-hdr h3{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+.sbadge{background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.calc-table{width:100%;border-collapse:collapse}
+.calc-table thead tr{background:#2E4D8A}
+.calc-table thead th{padding:9px 12px;font-size:11px;font-weight:700;color:#fff;text-align:center;letter-spacing:.3px;border-right:1px solid rgba(255,255,255,.1)}
+.calc-table thead th:first-child{text-align:left}
+.calc-table tbody tr{border-bottom:1px solid #f0ece5;transition:background .12s}
+.calc-table tbody tr:hover{background:#faf8f5}
+.calc-table tbody td{padding:10px 12px;font-size:12px;text-align:center;border-right:1px solid #f0ece5}
+.calc-table tbody td:first-child{text-align:left;font-weight:600;font-size:12px}
+.subtotal-row{background:#e8f5ee !important}
+.subtotal-row td{font-weight:700;color:#2d6a4a;font-size:12px}
+.m2-input{width:80px;padding:6px 8px;border:1.5px solid #e8c97a;border-radius:var(--radius-sm);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--carbon);background:#fffbee;text-align:center}
+.m2-input:focus{outline:none;border-color:var(--red);background:#fff}
+.cv{font-weight:600;color:#555}.cv.zero{color:#ccc}
+/* RESUMEN */
+.resumen-table{width:100%;border-collapse:collapse}
+.resumen-table thead tr{background:#2E4D8A}
+.resumen-table thead th{padding:9px 14px;font-size:11px;font-weight:700;color:#fff;text-align:center;letter-spacing:.3px}
+.resumen-table thead th:first-child{text-align:left}
+.resumen-table tbody tr{border-bottom:1px solid #f0ece5}
+.resumen-table tbody tr:hover{background:#faf8f5}
+.resumen-table tbody td{padding:9px 14px;font-size:13px;text-align:center}
+.resumen-table tbody td:first-child{text-align:left;font-weight:600}
+.total-row{background:var(--carbon) !important}
+.total-row td{color:#fff !important;font-weight:700;font-size:13px}
+.total-box{background:var(--carbon);color:var(--cream);border-radius:var(--radius);padding:22px 26px;display:flex;align-items:center;justify-content:space-between;margin-top:16px}
+.total-box .lbl{font-size:12px;font-weight:600;color:var(--taupe-light);margin-bottom:3px}
+.total-box .amt{font-size:30px;font-weight:700;color:#fff}
+/* PRECIOS */
+.precios-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.pg{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.pg-hdr{background:var(--carbon);color:var(--cream);padding:9px 15px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.pr{display:flex;align-items:center;justify-content:space-between;padding:9px 15px;border-bottom:1px solid #f0ece5;gap:10px}
+.pr:last-child{border-bottom:none}
+.pr-desc{font-size:12px;font-weight:600;flex:1}
+.pr-unit{font-size:10px;color:var(--taupe)}
+.pr-input{width:110px;padding:6px 9px;border:1.5px solid #e8c97a;border-radius:var(--radius-sm);font-family:'Quicksand',sans-serif;font-size:13px;font-weight:700;color:var(--carbon);background:#fffbee;text-align:right}
+.pr-input:focus{outline:none;border-color:var(--red);background:#fff}
+/* MODAL */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.modal-ov.open{display:flex}
+.modal-box{background:#fff;border-radius:var(--radius);padding:26px 30px;max-width:370px;width:90%;box-shadow:var(--shadow-lg)}
+.modal-box h3{font-size:15px;font-weight:700;margin-bottom:7px}
+.modal-box p{font-size:13px;color:var(--taupe);margin-bottom:18px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;z-index:999;background:var(--carbon);color:var(--cream);padding:11px 18px;border-radius:var(--radius);font-size:13px;font-weight:600;box-shadow:var(--shadow-lg);transform:translateY(80px);opacity:0;transition:all .3s;display:flex;align-items:center;gap:7px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-left:4px solid #6fcf97}.toast.error{border-left:4px solid var(--red)}
+@media(max-width:768px){.kpi-grid{grid-template-columns:1fr 1fr}.obra-info{grid-template-columns:1fr 1fr}.container{padding:14px}}
+</style>
+</head>
+<body>
+
+<!-- ══ DASHBOARD ═══════════════════════════ -->
+<div class="view active" id="view-dashboard">
+  <header class="hdr">
+    <div class="hdr-brand">
+      <div class="logo">ATR</div>
+      <div><div class="hdr-title">ATR STUDIO</div><div class="hdr-sub">Calculadora Durlock</div></div>
+    </div>
+    <div class="hdr-actions">
+      <div class="save-st" id="dashSt"><div class="dot"></div><span>—</span></div>
+      <button class="btn btn-ghost btn-sm" id="btnSync" onclick="syncDrive()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <span class="btn-text">Sincronizar</span><div class="spinner"></div>
+      </button>
+      <button class="btn btn-primary" onclick="nuevaObra()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Obra nueva
+      </button>
+    </div>
+  </header>
+  <div class="container">
+    <div class="kpi-grid">
+      <div class="kpi k-total"><div class="kpi-lbl">Total obras</div><div class="kpi-val" id="kpi-n">0</div><div class="kpi-sub" id="kpi-m2">0 m² totales</div></div>
+      <div class="kpi k-p"><div class="kpi-lbl">Presupuestadas</div><div class="kpi-val" id="kpi-np">0</div><div class="kpi-sub" id="kpi-pp">$ 0</div></div>
+      <div class="kpi k-a"><div class="kpi-lbl">Aprobadas</div><div class="kpi-val" id="kpi-na">0</div><div class="kpi-sub" id="kpi-pa">$ 0</div></div>
+      <div class="kpi k-eo"><div class="kpi-lbl">En obra</div><div class="kpi-val" id="kpi-neo">0</div><div class="kpi-sub" id="kpi-peo">$ 0</div></div>
+    </div>
+    <div class="toolbar">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input type="text" class="search" id="searchObras" placeholder="🔍  Buscar obra..." oninput="renderDash()">
+        <button class="fbtn active" data-f="todas" onclick="setFilter(this)">Todas</button>
+        <button class="fbtn" data-f="presupuestada" onclick="setFilter(this)">Presupuestadas</button>
+        <button class="fbtn" data-f="aprobada" onclick="setFilter(this)">Aprobadas</button>
+        <button class="fbtn" data-f="en-obra" onclick="setFilter(this)">En obra</button>
+        <button class="fbtn" data-f="finalizada" onclick="setFilter(this)">Finalizadas</button>
+      </div>
+    </div>
+    <div class="obras-grid" id="obrasGrid"></div>
+  </div>
+</div>
+
+<!-- ══ OBRA VIEW ════════════════════════════ -->
+<div class="view" id="view-obra">
+  <header class="hdr">
+    <div class="hdr-brand">
+      <button class="back-btn" onclick="volverDash()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15,18 9,12 15,6"/></svg>
+        Dashboard
+      </button>
+      <div class="divider"></div>
+      <div><div class="hdr-title" id="obraTitle">Nueva obra</div><div class="hdr-sub">ATR Studio — Durlock</div></div>
+    </div>
+    <div class="hdr-actions">
+      <select class="status-sel sp" id="statusSel" onchange="onStatusChange(this)">
+        <option value="presupuestada">Presupuestada</option>
+        <option value="aprobada">Aprobada</option>
+        <option value="en-obra">En obra</option>
+        <option value="finalizada">Finalizada</option>
+      </select>
+      <div class="save-st" id="obraSt"><div class="dot"></div><span>Sin cambios</span></div>
+      <button class="btn btn-ghost btn-sm" onclick="exportPDF()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        PDF
+      </button>
+      <button class="btn btn-ghost btn-sm" id="btnSave" onclick="guardarObra()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+        <span class="btn-text">Guardar</span><div class="spinner"></div>
+      </button>
+    </div>
+  </header>
+  <div class="container">
+    <div class="hero">
+      <div>
+        <h1>Cómputo de Materiales Durlock</h1>
+        <p>h=2,60m · montante c/600mm · placa 2,88m²</p>
+        <div class="badges">
+          <span class="badge badge-red">1 cara</span>
+          <span class="badge">2 caras</span>
+          <span class="badge">Cajón tipo L</span>
+        </div>
+      </div>
+      <button class="btn btn-secondary" onclick="resetAll()">Limpiar</button>
+    </div>
+    <div class="obra-info">
+      <div class="fg"><label>Obra / Proyecto</label><input type="text" id="obraName" placeholder="Ej: Oficinas Moody's" oninput="markDirty()"></div>
+      <div class="fg"><label>Dirección</label><input type="text" id="obraDir" placeholder="Butty 240, CABA" oninput="markDirty()"></div>
+      <div class="fg"><label>Fecha</label><input type="date" id="obraFecha" oninput="markDirty()"></div>
+      <button class="btn btn-primary" onclick="calcularTodo()">Calcular</button>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('computo')">📐 Cómputo</button>
+      <button class="tab" onclick="showTab('resumen')">📊 Resumen &amp; Costos</button>
+      <button class="tab" onclick="showTab('precios')">💲 Lista de Precios</button>
+    </div>
+    <!-- CÓMPUTO -->
+    <div class="tab-panel active" id="tab-computo">
+      <div class="section-card">
+        <div class="sec-hdr"><h3>📏 TABIQUE DE UNA CARA <span class="sbadge">4 tipologías</span></h3></div>
+        <div style="overflow-x:auto">
+          <table class="calc-table"><thead><tr>
+            <th style="min-width:210px">Tipología</th><th>M²</th><th>Placa (u)</th>
+            <th>Solera (ml)</th><th>Montante (ml)</th>
+            <th>T-1 Estruc.</th><th>T-2 Placa</th><th>T-3 —</th>
+            <th>Masilla (kg)</th><th>Cinta (ml)</th><th>Lana (m²)</th>
+          </tr></thead><tbody id="tbody-1c"></tbody></table>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="sec-hdr"><h3>📐 TABIQUE DE DOS CARAS <span class="sbadge">3 tipologías</span></h3></div>
+        <div style="overflow-x:auto">
+          <table class="calc-table"><thead><tr>
+            <th style="min-width:210px">Tipología</th><th>M²</th><th>Placa (u)</th>
+            <th>Solera (ml)</th><th>Montante (ml)</th>
+            <th>T-1 Estruc.</th><th>T-2 —</th><th>T-3 Placa</th>
+            <th>Masilla (kg)</th><th>Cinta (ml)</th><th>Lana (m²)</th>
+          </tr></thead><tbody id="tbody-2c"></tbody></table>
+        </div>
+      </div>
+      <div class="section-card">
+        <div class="sec-hdr"><h3>📦 CAJÓN TIPO L — Estructura 35mm · h=30cm</h3></div>
+        <div style="overflow-x:auto">
+          <table class="calc-table"><thead><tr>
+            <th style="min-width:210px">Tipo</th><th>Largo (ml)</th>
+            <th>M² Frontal</th><th>M² Base</th><th>Placa (u)</th>
+            <th>Solera 35mm</th><th>Montante 35mm</th>
+            <th>T-1 Estruc.</th><th>T-2 Placa</th><th>Masilla (kg)</th><th>Cantonera (ml)</th>
+          </tr></thead><tbody id="tbody-cajon"></tbody></table>
+        </div>
+      </div>
+    </div>
+    <!-- RESUMEN -->
+    <div class="tab-panel" id="tab-resumen">
+      <div class="section-card">
+        <div class="sec-hdr"><h3>📊 RESUMEN GENERAL DE MATERIALES</h3></div>
+        <div style="overflow-x:auto;padding:0">
+          <table class="resumen-table"><thead><tr>
+            <th style="text-align:left;min-width:200px">Material</th>
+            <th>Unidad</th><th>Cantidad</th><th>P. Unitario</th><th>Total $</th>
+          </tr></thead><tbody id="tbody-resumen"></tbody></table>
+        </div>
+      </div>
+      <div class="total-box">
+        <div><div class="lbl">TOTAL ESTIMADO</div><div class="amt" id="totalAmount">$ 0,00</div><div style="font-size:11px;color:var(--taupe-light);margin-top:2px">Precios netos s/IVA</div></div>
+        <div style="text-align:right"><div class="lbl">Obra</div><div style="font-size:14px;font-weight:700;color:#fff" id="totalObra">—</div><div class="lbl" style="margin-top:6px">Fecha</div><div style="font-size:12px;color:var(--taupe-light)" id="totalFecha">—</div></div>
+      </div>
+    </div>
+    <!-- PRECIOS -->
+    <div class="tab-panel" id="tab-precios">
+      <div style="background:#fff;border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+        <div><div style="font-weight:700;font-size:14px">Precios Renew House — neto s/IVA</div><div style="font-size:11px;color:var(--taupe);margin-top:2px">Actualizá cuando llegue nueva factura.</div></div>
+        <button class="btn btn-primary btn-sm" onclick="guardarObra()">💾 Guardar</button>
+      </div>
+      <div class="precios-grid" id="preciosGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal eliminar -->
+<div class="modal-ov" id="modalDel">
+  <div class="modal-box">
+    <h3>¿Eliminar obra?</h3>
+    <p id="modalDelTxt">Esta acción no se puede deshacer.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="doDelete()">Eliminar</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+// DATOS
+// ═══════════════════════════════════════
+const TIPOS_1C = [
+  { label:"Tabique 1 cara — 70mm (sin aislación)",      rend:{ placa:0.365,solera:0.769,mont:2.667,t1:4,t2:9,t3:0,masilla:0.30,cinta:1.10,lana:0 } },
+  { label:"Tabique 1 cara — 70mm (con lana de vidrio)", rend:{ placa:0.365,solera:0.769,mont:2.667,t1:4,t2:9,t3:0,masilla:0.30,cinta:1.10,lana:1.05 } },
+  { label:"Tabique 1 cara — 35mm (sin aislación)",      rend:{ placa:0.365,solera:0.769,mont:2.667,t1:4,t2:9,t3:0,masilla:0.30,cinta:1.10,lana:0 } },
+  { label:"Tabique 1 cara — 35mm (con lana de vidrio)", rend:{ placa:0.365,solera:0.769,mont:2.667,t1:4,t2:9,t3:0,masilla:0.30,cinta:1.10,lana:1.05 } },
+];
+const TIPOS_2C = [
+  { label:"Tabique 2 caras — 70mm (sin aislación)",      rend:{ placa:0.730,solera:0.769,mont:2.667,t1:4,t2:0,t3:18,masilla:0.50,cinta:2.20,lana:0 } },
+  { label:"Tabique 2 caras — 70mm (con lana de vidrio)", rend:{ placa:0.730,solera:0.769,mont:2.667,t1:4,t2:0,t3:18,masilla:0.50,cinta:2.20,lana:1.05 } },
+  { label:"Tabique 2 caras — 70mm doble placa c/cara",   rend:{ placa:1.460,solera:0.769,mont:2.667,t1:4,t2:0,t3:36,masilla:0.80,cinta:4.40,lana:0 } },
+];
+let PRECIOS = {
+  placa:14772.79, solera70:6285.49, mont70:6998.04,
+  solera35:4571.83, mont35:5235.82,
+  t1:12005.53, t2:9110.52, t3:25575.49,
+  masilla:32227.44, cinta:7952.00, lana:27013.32, cantonera:2686.92,
+};
+const GRUPOS_PRECIOS = [
+  { titulo:"PLACAS", items:[
+    { key:"placa", label:"Placa Knauf ST 12,5mm 1,20×2,40", unidad:"por unidad" }]},
+  { titulo:"PERFILES 70mm", items:[
+    { key:"solera70", label:"Perfil Solera 70mm (tira 2,60m)", unidad:"por tira" },
+    { key:"mont70",   label:"Perfil Montante 70mm (tira 2,60m)", unidad:"por tira" }]},
+  { titulo:"PERFILES 35mm", items:[
+    { key:"solera35", label:"Perfil Solera 35mm (tira 2,60m)", unidad:"por tira" },
+    { key:"mont35",   label:"Perfil Montante 35mm (tira 2,60m)", unidad:"por tira" }]},
+  { titulo:"TORNILLOS", items:[
+    { key:"t1", label:'T-1 Aguja 8×½" — estructura (x1000u)', unidad:"por millar" },
+    { key:"t2", label:'T-2 Aguja 6×1" — placa 1 cara (x1000u)', unidad:"por millar" },
+    { key:"t3", label:'T-3 Aguja 6×1⅝" — placa 2 caras (x1000u)', unidad:"por millar" }]},
+  { titulo:"MASILLA / CINTA / LANA", items:[
+    { key:"masilla", label:"Masilla Plástica Anclaflex 32kg", unidad:"por balde 32kg" },
+    { key:"cinta",   label:"Cinta de Papel 150m", unidad:"por rollo 150m" },
+    { key:"lana",    label:"Acustiver P 50mm 1,20×1,20", unidad:"por panel 1,44m²" }]},
+  { titulo:"CANTONERA", items:[
+    { key:"cantonera", label:"Cantonera Metálica (tira 2,60m)", unidad:"por tira 2,60m" }]},
+];
+
+// ═══════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════
+let obras=[], obraId=null, filtro="todas", delId=null, dirty=false;
+let gapiReady=false, tokenClient=null, driveFileId=null;
+const DRIVE_FILE="atr-durlock-obras.json";
+const CLIENT_ID="267420121557-6d8b3912u4jbmjf25152ad4pborqre7f.apps.googleusercontent.com";
+const SCOPES="https://www.googleapis.com/auth/drive.file";
+
+// ═══════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════
+function fmt(n) {
+  if (n===null||n===undefined) return "—";
+  if (Number.isInteger(n)) return n.toLocaleString("es-AR");
+  return n.toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtP(n) { return "$ "+n.toLocaleString("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function el(id) { return document.getElementById(id); }
+function setVal(id, v) {
+  var e=el(id); if(!e) return;
+  e.textContent = (v===null||v==="—") ? "—" : fmt(v);
+  e.className = "cv" + ((!v||v===0||v==="—") ? " zero" : "");
+}
+function showToast(msg,type) {
+  var t=el("toast");
+  t.textContent=((type==="error")?"✕ ":"✓ ")+msg;
+  t.className="toast "+(type||"success")+" show";
+  setTimeout(function(){t.classList.remove("show");},3200);
+}
+function markDirty() {
+  dirty=true;
+  var s=el("obraSt"); if(!s) return;
+  s.className="save-st unsaved"; s.innerHTML='<div class="dot"></div><span>Sin guardar</span>';
+}
+function markSaved() {
+  dirty=false;
+  var s=el("obraSt"); if(!s) return;
+  s.className="save-st saved"; s.innerHTML='<div class="dot"></div><span>Guardado ✓</span>';
+  setTimeout(function(){ s.className="save-st"; s.innerHTML='<div class="dot"></div><span>Sin cambios</span>'; },3000);
+}
+function precioU(key,tipo) {
+  if (key==="placa")     return PRECIOS.placa;
+  if (key==="solera")    return tipo==="cajon" ? PRECIOS.solera35/2.6 : PRECIOS.solera70/2.6;
+  if (key==="mont")      return tipo==="cajon" ? PRECIOS.mont35/2.6   : PRECIOS.mont70/2.6;
+  if (key==="t1")        return PRECIOS.t1/1000;
+  if (key==="t2")        return PRECIOS.t2/1000;
+  if (key==="t3")        return PRECIOS.t3/1000;
+  if (key==="masilla")   return PRECIOS.masilla/32;
+  if (key==="cinta")     return PRECIOS.cinta/150;
+  if (key==="lana")      return PRECIOS.lana/1.44;
+  if (key==="cantonera") return PRECIOS.cantonera/2.6;
+  return 0;
+}
+
+// ═══════════════════════════════════════
+// NAVEGACIÓN
+// ═══════════════════════════════════════
+function showView(id) {
+  document.querySelectorAll(".view").forEach(function(v){v.classList.remove("active");});
+  el("view-"+id).classList.add("active");
+  window.scrollTo(0,0);
+}
+function showTab(id) {
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active");});
+  document.querySelectorAll(".tab-panel").forEach(function(p){p.classList.remove("active");});
+  el("tab-"+id).classList.add("active");
+  var tabs=document.querySelectorAll(".tab");
+  var map={computo:0,resumen:1,precios:2};
+  if(tabs[map[id]]) tabs[map[id]].classList.add("active");
+  if(id==="resumen") calcularTodo();
+}
+function nuevaObra() {
+  obraId="o_"+Date.now();
+  el("obraName").value=""; el("obraDir").value="";
+  el("obraFecha").value=new Date().toISOString().split("T")[0];
+  document.querySelectorAll(".m2-input").forEach(function(i){i.value=0;});
+  el("i_cajon").value=0;
+  var sel=el("statusSel"); sel.value="presupuestada"; sel.className="status-sel sp";
+  el("obraTitle").textContent="Nueva obra";
+  showTab("computo");
+  calcularTodo();
+  markDirty();
+  showView("obra");
+}
+function abrirObra(id) {
+  var o=obras.find(function(x){return x.id===id;}); if(!o) return;
+  obraId=id;
+  el("obraName").value=o.nombre||""; el("obraDir").value=o.direccion||""; el("obraFecha").value=o.fecha||"";
+  if(o.inputs1c) o.inputs1c.forEach(function(v,i){var e=el("i1c_"+i);if(e)e.value=v;});
+  if(o.inputs2c) o.inputs2c.forEach(function(v,i){var e=el("i2c_"+i);if(e)e.value=v;});
+  el("i_cajon").value=o.inputCajon||0;
+  if(o.precios){Object.assign(PRECIOS,o.precios);initPrecios();}
+  var sel=el("statusSel"); sel.value=o.status||"presupuestada";
+  var cls={presupuestada:"sp",aprobada:"sa","en-obra":"seo",finalizada:"sf"};
+  sel.className="status-sel "+(cls[o.status||"presupuestada"]);
+  el("obraTitle").textContent=o.nombre||"Sin nombre";
+  showTab("computo"); calcularTodo(); markSaved(); showView("obra");
+}
+function volverDash(){showView("dashboard");renderDash();}
+function onStatusChange(sel){
+  var cls={presupuestada:"sp",aprobada:"sa","en-obra":"seo",finalizada:"sf"};
+  sel.className="status-sel "+(cls[sel.value]||"sp"); markDirty();
+}
+function resetAll(){
+  document.querySelectorAll(".m2-input").forEach(function(e){e.value=0;});
+  el("i_cajon").value=0; calcularTodo();
+}
+
+// ═══════════════════════════════════════
+// INIT TABLAS
+// ═══════════════════════════════════════
+function initTablas() {
+  // 1 cara
+  var tb1=el("tbody-1c"); tb1.innerHTML="";
+  TIPOS_1C.forEach(function(t,i){
+    var tr=document.createElement("tr");
+    tr.innerHTML="<td>"+t.label+"</td>"+
+      "<td><input type='number' class='m2-input' id='i1c_"+i+"' value='0' min='0' step='0.5' oninput='calcularTodo()'></td>"+
+      "<td class='cv zero' id='r1c_"+i+"_placa'>0</td>"+
+      "<td class='cv zero' id='r1c_"+i+"_solera'>0</td>"+
+      "<td class='cv zero' id='r1c_"+i+"_mont'>0</td>"+
+      "<td class='cv zero' id='r1c_"+i+"_t1'>0</td>"+
+      "<td class='cv zero' id='r1c_"+i+"_t2'>0</td>"+
+      "<td class='cv zero' id='r1c_"+i+"_t3'>—</td>"+
+      "<td class='cv zero' id='r1c_"+i+"_masilla'>0</td>"+
+      "<td class='cv zero' id='r1c_"+i+"_cinta'>0</td>"+
+      "<td class='cv zero' id='r1c_"+i+"_lana'>"+(t.rend.lana===0?"—":"0")+"</td>";
+    tb1.appendChild(tr);
+  });
+  var s1=document.createElement("tr"); s1.className="subtotal-row";
+  s1.innerHTML="<td colspan='2'>SUBTOTAL — 1 CARA</td>"+
+    "<td id='sub1c_placa'>0</td><td id='sub1c_solera'>0</td><td id='sub1c_mont'>0</td>"+
+    "<td id='sub1c_t1'>0</td><td id='sub1c_t2'>0</td><td id='sub1c_t3'>0</td>"+
+    "<td id='sub1c_masilla'>0</td><td id='sub1c_cinta'>0</td><td id='sub1c_lana'>0</td>";
+  tb1.appendChild(s1);
+  // 2 caras
+  var tb2=el("tbody-2c"); tb2.innerHTML="";
+  TIPOS_2C.forEach(function(t,i){
+    var tr=document.createElement("tr");
+    tr.innerHTML="<td>"+t.label+"</td>"+
+      "<td><input type='number' class='m2-input' id='i2c_"+i+"' value='0' min='0' step='0.5' oninput='calcularTodo()'></td>"+
+      "<td class='cv zero' id='r2c_"+i+"_placa'>0</td>"+
+      "<td class='cv zero' id='r2c_"+i+"_solera'>0</td>"+
+      "<td class='cv zero' id='r2c_"+i+"_mont'>0</td>"+
+      "<td class='cv zero' id='r2c_"+i+"_t1'>0</td>"+
+      "<td class='cv zero' id='r2c_"+i+"_t2'>—</td>"+
+      "<td class='cv zero' id='r2c_"+i+"_t3'>0</td>"+
+      "<td class='cv zero' id='r2c_"+i+"_masilla'>0</td>"+
+      "<td class='cv zero' id='r2c_"+i+"_cinta'>0</td>"+
+      "<td class='cv zero' id='r2c_"+i+"_lana'>"+(t.rend.lana===0?"—":"0")+"</td>";
+    tb2.appendChild(tr);
+  });
+  var s2=document.createElement("tr"); s2.className="subtotal-row";
+  s2.innerHTML="<td colspan='2'>SUBTOTAL — 2 CARAS</td>"+
+    "<td id='sub2c_placa'>0</td><td id='sub2c_solera'>0</td><td id='sub2c_mont'>0</td>"+
+    "<td id='sub2c_t1'>0</td><td id='sub2c_t2'>0</td><td id='sub2c_t3'>0</td>"+
+    "<td id='sub2c_masilla'>0</td><td id='sub2c_cinta'>0</td><td id='sub2c_lana'>0</td>";
+  tb2.appendChild(s2);
+  // Cajón
+  var tbc=el("tbody-cajon"); tbc.innerHTML=
+    "<tr><td>Cajón tipo L (frontal + base)</td>"+
+    "<td><input type='number' class='m2-input' id='i_cajon' value='0' min='0' step='0.1' oninput='calcularTodo()'></td>"+
+    "<td class='cv zero' id='rc_frontal'>0</td><td class='cv zero' id='rc_base'>0</td>"+
+    "<td class='cv zero' id='rc_placa'>0</td><td class='cv zero' id='rc_solera'>0</td>"+
+    "<td class='cv zero' id='rc_mont'>0</td><td class='cv zero' id='rc_t1'>0</td>"+
+    "<td class='cv zero' id='rc_t2'>0</td><td class='cv zero' id='rc_masilla'>0</td>"+
+    "<td class='cv zero' id='rc_cantonera'>0</td></tr>"+
+    "<tr class='subtotal-row'><td colspan='2'>SUBTOTAL — CAJÓN</td>"+
+    "<td id='subc_frontal'>0</td><td id='subc_base'>0</td>"+
+    "<td id='subc_placa'>0</td><td id='subc_solera'>0</td><td id='subc_mont'>0</td>"+
+    "<td id='subc_t1'>0</td><td id='subc_t2'>0</td>"+
+    "<td id='subc_masilla'>0</td><td id='subc_cantonera'>0</td></tr>";
+}
+
+// ═══════════════════════════════════════
+// CALCULAR
+// ═══════════════════════════════════════
+function calcularTodo() {
+  markDirty();
+  var tot={placa:0,sol70:0,mont70:0,sol35:0,mont35:0,t1:0,t2:0,t3:0,masilla:0,cinta:0,lana:0,cantonera:0};
+
+  TIPOS_1C.forEach(function(t,i){
+    var m2=parseFloat(el("i1c_"+i).value)||0, r=t.rend;
+    var v={placa:Math.ceil(m2*r.placa),solera:Math.ceil(m2*r.solera),mont:Math.ceil(m2*r.mont),
+           t1:Math.ceil(m2*r.t1),t2:Math.ceil(m2*r.t2),t3:0,
+           masilla:Math.round(m2*r.masilla*10)/10,cinta:Math.round(m2*r.cinta*10)/10,
+           lana:r.lana>0?Math.round(m2*r.lana*10)/10:null};
+    setVal("r1c_"+i+"_placa",v.placa); setVal("r1c_"+i+"_solera",v.solera);
+    setVal("r1c_"+i+"_mont",v.mont);   setVal("r1c_"+i+"_t1",v.t1);
+    setVal("r1c_"+i+"_t2",v.t2);
+    var e3=el("r1c_"+i+"_t3"); if(e3){e3.textContent="—";e3.className="cv zero";}
+    setVal("r1c_"+i+"_masilla",v.masilla); setVal("r1c_"+i+"_cinta",v.cinta);
+    if(v.lana!==null) setVal("r1c_"+i+"_lana",v.lana);
+    else{var el2=el("r1c_"+i+"_lana");if(el2){el2.textContent="—";el2.className="cv zero";}}
+    var is35=t.label.includes("35mm");
+    tot.placa+=v.placa; tot.t1+=v.t1; tot.t2+=v.t2;
+    tot.masilla+=v.masilla; tot.cinta+=v.cinta;
+    if(v.lana!==null)tot.lana+=v.lana;
+    if(is35){tot.sol35+=v.solera;tot.mont35+=v.mont;}else{tot.sol70+=v.solera;tot.mont70+=v.mont;}
+  });
+  ["placa","solera","mont","t1","t2","t3","masilla","cinta","lana"].forEach(function(k){
+    var e=el("sub1c_"+k); if(e) e.textContent=fmt(tot[k==="solera"?"sol70":k==="mont"?"mont70":k]||0);
+  });
+
+  TIPOS_2C.forEach(function(t,i){
+    var m2=parseFloat(el("i2c_"+i).value)||0, r=t.rend;
+    var v={placa:Math.ceil(m2*r.placa),solera:Math.ceil(m2*r.solera),mont:Math.ceil(m2*r.mont),
+           t1:Math.ceil(m2*r.t1),t2:0,t3:Math.ceil(m2*r.t3),
+           masilla:Math.round(m2*r.masilla*10)/10,cinta:Math.round(m2*r.cinta*10)/10,
+           lana:r.lana>0?Math.round(m2*r.lana*10)/10:null};
+    setVal("r2c_"+i+"_placa",v.placa); setVal("r2c_"+i+"_solera",v.solera);
+    setVal("r2c_"+i+"_mont",v.mont);   setVal("r2c_"+i+"_t1",v.t1);
+    var e2=el("r2c_"+i+"_t2"); if(e2){e2.textContent="—";e2.className="cv zero";}
+    setVal("r2c_"+i+"_t3",v.t3);
+    setVal("r2c_"+i+"_masilla",v.masilla); setVal("r2c_"+i+"_cinta",v.cinta);
+    if(v.lana!==null)setVal("r2c_"+i+"_lana",v.lana);
+    else{var el2=el("r2c_"+i+"_lana");if(el2){el2.textContent="—";el2.className="cv zero";}}
+    tot.placa+=v.placa; tot.t1+=v.t1; tot.t3+=v.t3;
+    tot.masilla+=v.masilla; tot.cinta+=v.cinta;
+    if(v.lana!==null)tot.lana+=v.lana;
+    tot.sol70+=v.solera; tot.mont70+=v.mont;
+  });
+
+  var largo=parseFloat(el("i_cajon").value)||0;
+  var mf=Math.round(largo*0.3*100)/100, mb=mf, mc=mf+mb;
+  var caj={frontal:mf,base:mb,placa:Math.ceil(mc*0.365),solera:Math.ceil(mc*0.769),
+           mont:Math.ceil(mc*2.667),t1:Math.ceil(mc*4),t2:Math.ceil(mc*9),
+           masilla:Math.round(mc*0.15*10)/10,cantonera:Math.round(largo*10)/10};
+  Object.keys(caj).forEach(function(k){setVal("rc_"+k,caj[k]);setVal("subc_"+k,caj[k]);});
+  tot.placa+=caj.placa; tot.sol35+=caj.solera; tot.mont35+=caj.mont;
+  tot.t1+=caj.t1; tot.t2+=caj.t2; tot.masilla+=caj.masilla; tot.cantonera=caj.cantonera;
+
+  actualizarResumen(tot);
+}
+
+function actualizarResumen(tot) {
+  var filas=[
+    {label:"Placa Knauf ST 12,5mm",               unidad:"u",  cant:tot.placa,    key:"placa",    tipo:"1c"},
+    {label:"Perfil Solera 70mm",                   unidad:"ml", cant:tot.sol70,    key:"solera",   tipo:"1c"},
+    {label:"Perfil Solera 35mm (cajón)",           unidad:"ml", cant:tot.sol35,    key:"solera",   tipo:"cajon"},
+    {label:"Perfil Montante 70mm",                 unidad:"ml", cant:tot.mont70,   key:"mont",     tipo:"1c"},
+    {label:"Perfil Montante 35mm (cajón)",         unidad:"ml", cant:tot.mont35,   key:"mont",     tipo:"cajon"},
+    {label:'T-1 Aguja 8×½" — estructura',         unidad:"u",  cant:tot.t1,       key:"t1",       tipo:"1c"},
+    {label:'T-2 Aguja 6×1" — placa 1 cara',       unidad:"u",  cant:tot.t2,       key:"t2",       tipo:"1c"},
+    {label:'T-3 Aguja 6×1⅝" — placa 2 caras',    unidad:"u",  cant:tot.t3,       key:"t3",       tipo:"1c"},
+    {label:"Masilla para juntas",                  unidad:"kg", cant:tot.masilla,  key:"masilla",  tipo:"1c"},
+    {label:"Cinta de papel",                       unidad:"ml", cant:tot.cinta,    key:"cinta",    tipo:"1c"},
+    {label:"Lana de vidrio 50mm",                  unidad:"m²", cant:tot.lana,     key:"lana",     tipo:"1c"},
+    {label:"Cantonera metálica",                   unidad:"ml", cant:tot.cantonera,key:"cantonera",tipo:"cajon"},
+  ];
+  var tbody=el("tbody-resumen"); tbody.innerHTML="";
+  var totalG=0;
+  filas.forEach(function(f){
+    var pu=precioU(f.key,f.tipo), total=f.cant*pu; totalG+=total;
+    var tr=document.createElement("tr");
+    tr.innerHTML="<td>"+f.label+"</td><td>"+f.unidad+"</td>"+
+      "<td><strong>"+fmt(f.cant)+"</strong></td>"+
+      "<td style='color:var(--taupe);font-size:12px'>"+fmtP(pu)+"</td>"+
+      "<td style='font-weight:700;color:"+(total>0?"var(--carbon)":"#ccc")+"'>"+fmtP(total)+"</td>";
+    tbody.appendChild(tr);
+  });
+  var trT=document.createElement("tr"); trT.className="total-row";
+  trT.innerHTML="<td colspan='4' style='text-align:right;padding-right:16px'>TOTAL ESTIMADO</td><td>"+fmtP(totalG)+"</td>";
+  tbody.appendChild(trT);
+  el("totalAmount").textContent=fmtP(totalG);
+  el("totalObra").textContent=el("obraName").value||"—";
+  el("totalFecha").textContent=el("obraFecha").value||"—";
+}
+
+// ═══════════════════════════════════════
+// PRECIOS
+// ═══════════════════════════════════════
+function initPrecios(){
+  var grid=el("preciosGrid"); if(!grid) return;
+  grid.innerHTML="";
+  GRUPOS_PRECIOS.forEach(function(g){
+    var div=document.createElement("div"); div.className="pg";
+    div.innerHTML="<div class='pg-hdr'>"+g.titulo+"</div>";
+    g.items.forEach(function(item){
+      var row=document.createElement("div"); row.className="pr";
+      var inp=document.createElement("input");
+      inp.type="number"; inp.className="pr-input";
+      inp.value=PRECIOS[item.key]; inp.step="0.01"; inp.min="0";
+      inp.addEventListener("input",function(){ PRECIOS[item.key]=parseFloat(this.value)||0; calcularTodo(); markDirty(); });
+      var desc=document.createElement("div");
+      desc.innerHTML="<div class='pr-desc'>"+item.label+"</div><div class='pr-unit'>"+item.unidad+"</div>";
+      row.appendChild(desc); row.appendChild(inp);
+      div.appendChild(row);
+    });
+    grid.appendChild(div);
+  });
+}
+function updatePrecio(key,val){ PRECIOS[key]=parseFloat(val)||0; calcularTodo(); markDirty(); }
+
+// ═══════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════
+function setFilter(btn){
+  document.querySelectorAll(".fbtn").forEach(function(b){b.classList.remove("active");});
+  btn.classList.add("active"); filtro=btn.dataset.f; renderDash();
+}
+function renderDash(){
+  var q=(el("searchObras").value||"").toLowerCase();
+  var cnt={presupuestada:0,aprobada:0,"en-obra":0,finalizada:0};
+  var tot={presupuestada:0,aprobada:0,"en-obra":0,finalizada:0};
+  var m2t=0;
+  obras.forEach(function(o){
+    var st=o.status||"presupuestada";
+    cnt[st]=(cnt[st]||0)+1; tot[st]=(tot[st]||0)+(o.totalPesos||0); m2t+=(o.totalM2||0);
+  });
+  el("kpi-n").textContent=obras.length; el("kpi-m2").textContent=fmt(m2t)+" m² totales";
+  el("kpi-np").textContent=cnt.presupuestada||0; el("kpi-pp").textContent=fmtP(tot.presupuestada||0);
+  el("kpi-na").textContent=cnt.aprobada||0; el("kpi-pa").textContent=fmtP(tot.aprobada||0);
+  el("kpi-neo").textContent=cnt["en-obra"]||0; el("kpi-peo").textContent=fmtP(tot["en-obra"]||0);
+
+  var lista=obras.filter(function(o){
+    var mq=!q||(o.nombre||"").toLowerCase().includes(q)||(o.direccion||"").toLowerCase().includes(q);
+    var mf=filtro==="todas"||(o.status||"presupuestada")===filtro;
+    return mq&&mf;
+  }).sort(function(a,b){return(b.updatedAt||0)-(a.updatedAt||0);});
+
+  var grid=el("obrasGrid"); grid.innerHTML="";
+  if(!lista.length){
+    grid.innerHTML="<div class='empty'><div class='empty-icon'>📋</div><h3>No hay obras</h3><p>Creá una nueva con el botón Obra nueva</p></div>";
+    return;
+  }
+  var lbl={presupuestada:"Presupuestada",aprobada:"Aprobada","en-obra":"En obra",finalizada:"Finalizada"};
+  var pc={presupuestada:"pill-p",aprobada:"pill-a","en-obra":"pill-eo",finalizada:"pill-f"};
+  lista.forEach(function(o){
+    var st=o.status||"presupuestada";
+    var card=document.createElement("div"); card.className="ocard";
+    card.innerHTML=
+      "<div class='ocard-top'>"+
+        "<div><div class='ocard-nombre'>"+(o.nombre||"Sin nombre")+"</div>"+
+        "<div class='ocard-dir'>"+(o.direccion||"—")+"</div></div>"+
+        "<span class='pill "+pc[st]+"'>"+lbl[st]+"</span>"+
+      "</div>"+
+      "<div class='ocard-body'>"+
+        "<div><div class='ostat-lbl'>M² total</div><div class='ostat-val'>"+fmt(o.totalM2||0)+"</div></div>"+
+        "<div><div class='ostat-lbl'>Placas</div><div class='ostat-val'>"+fmt(o.totalPlacas||0)+" u</div></div>"+
+        "<div><div class='ostat-lbl'>Total $</div><div class='ostat-val' style='color:var(--red);font-size:13px'>"+fmtP(o.totalPesos||0)+"</div></div>"+
+      "</div>"+
+      "<div class='ocard-foot'>"+
+        "<span style='font-size:11px;color:var(--taupe)'>"+(o.fecha||"—")+"</span>"+
+        "<button class='btn btn-sm' style='background:#fff0f0;color:var(--red);border:none;font-size:11px' id='del_"+o.id+"'>Eliminar</button>"+
+      "</div>";
+    card.addEventListener("click",function(e){if(e.target.id&&e.target.id.startsWith("del_"))return; abrirObra(o.id);});
+    card.querySelector("#del_"+o.id).addEventListener("click",function(e){e.stopPropagation();pedirEliminar(o.id,o.nombre||"Sin nombre");});
+    grid.appendChild(card);
+  });
+}
+
+// ═══════════════════════════════════════
+// GUARDAR OBRA
+// ═══════════════════════════════════════
+function getObraState(){
+  var totalPesosStr=(el("totalAmount").textContent||"0").replace(/[^\d,]/g,"").replace(",",".");
+  var totalPesos=parseFloat(totalPesosStr)||0;
+  var p1=parseInt((el("sub1c_placa")||{textContent:"0"}).textContent.replace(/\./g,""))||0;
+  var p2=parseInt((el("sub2c_placa")||{textContent:"0"}).textContent.replace(/\./g,""))||0;
+  var pc=parseInt((el("subc_placa") ||{textContent:"0"}).textContent.replace(/\./g,""))||0;
+  var i1=TIPOS_1C.map(function(_,i){return parseFloat((el("i1c_"+i)||{value:0}).value)||0;});
+  var i2=TIPOS_2C.map(function(_,i){return parseFloat((el("i2c_"+i)||{value:0}).value)||0;});
+  var ic=parseFloat((el("i_cajon")||{value:0}).value)||0;
+  var m2=i1.reduce(function(a,b){return a+b;},0)+i2.reduce(function(a,b){return a+b;},0)+ic*0.6;
+  return {
+    id:obraId, nombre:el("obraName").value, direccion:el("obraDir").value,
+    fecha:el("obraFecha").value, status:el("statusSel").value,
+    inputs1c:i1, inputs2c:i2, inputCajon:ic,
+    precios:Object.assign({},PRECIOS),
+    totalM2:Math.round(m2*10)/10, totalPesos:totalPesos, totalPlacas:p1+p2+pc,
+    updatedAt:Date.now(),
+  };
+}
+async function guardarObra(){
+  calcularTodo();
+  var btn=el("btnSave"); btn.classList.add("btn-loading"); btn.disabled=true;
+  try{
+    await ensureAuth();
+    var state=getObraState();
+    var idx=obras.findIndex(function(o){return o.id===obraId;});
+    if(idx>=0)obras[idx]=state; else obras.push(state);
+    el("obraTitle").textContent=state.nombre||"Sin nombre";
+    await driveSave(); markSaved(); showToast("Obra guardada ✓");
+  }catch(e){showToast("Error: "+e.message,"error");console.error(e);}
+  btn.classList.remove("btn-loading"); btn.disabled=false;
+}
+
+// ═══════════════════════════════════════
+// ELIMINAR
+// ═══════════════════════════════════════
+function pedirEliminar(id,nombre){
+  delId=id; el("modalDelTxt").textContent="¿Eliminás \""+nombre+"\"? No se puede deshacer.";
+  el("modalDel").classList.add("open");
+}
+function closeModal(){el("modalDel").classList.remove("open");delId=null;}
+async function doDelete(){
+  if(!delId) return;
+  obras=obras.filter(function(o){return o.id!==delId;}); closeModal();
+  try{await ensureAuth();await driveSave();}catch(e){}
+  showToast("Obra eliminada"); renderDash();
+}
+
+// ═══════════════════════════════════════
+// GOOGLE DRIVE
+// ═══════════════════════════════════════
+async function driveSave(){
+  var content=JSON.stringify({obras:obras,precios:PRECIOS,savedAt:new Date().toISOString()},null,2);
+  var token=gapi.client.getToken().access_token;
+  if(driveFileId){
+    await fetch("https://www.googleapis.com/upload/drive/v3/files/"+driveFileId+"?uploadType=media",
+      {method:"PATCH",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:content});
+  } else {
+    var meta=await gapi.client.drive.files.list({q:"name='"+DRIVE_FILE+"' and trashed=false",fields:"files(id)"});
+    var files=meta.result.files;
+    if(files&&files.length>0){
+      driveFileId=files[0].id;
+      await fetch("https://www.googleapis.com/upload/drive/v3/files/"+driveFileId+"?uploadType=media",
+        {method:"PATCH",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:content});
+    } else {
+      var boundary="-------atr314159";
+      var body="--"+boundary+"\r\nContent-Type: application/json\r\n\r\n"+
+        JSON.stringify({name:DRIVE_FILE,mimeType:"application/json"})+
+        "\r\n--"+boundary+"\r\nContent-Type: application/json\r\n\r\n"+content+"\r\n--"+boundary+"--";
+      var res=await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+        {method:"POST",headers:{"Content-Type":"multipart/related; boundary="+boundary,"Authorization":"Bearer "+token},body:body});
+      driveFileId=(await res.json()).id;
+    }
+  }
+}
+async function driveLoad(){
+  try{
+    var meta=await gapi.client.drive.files.list({q:"name='"+DRIVE_FILE+"' and trashed=false",fields:"files(id)"});
+    var files=meta.result.files;
+    if(!files||!files.length){renderDash();return;}
+    driveFileId=files[0].id;
+    var res=await gapi.client.drive.files.get({fileId:driveFileId,alt:"media"});
+    var data=JSON.parse(res.body);
+    if(data.obras) obras=data.obras;
+    if(data.precios) Object.assign(PRECIOS,data.precios);
+    renderDash();
+    var s=el("dashSt"); if(s){s.className="save-st saved";s.innerHTML='<div class="dot"></div><span>Sincronizado ✓</span>';}
+  }catch(e){renderDash();}
+}
+async function syncDrive(){
+  var btn=el("btnSync"); btn.classList.add("btn-loading"); btn.disabled=true;
+  try{await ensureAuth();await driveLoad();showToast("Sincronizado ✓");}
+  catch(e){showToast("Error al sincronizar","error");}
+  btn.classList.remove("btn-loading"); btn.disabled=false;
+}
+function ensureAuth(){
+  return new Promise(function(resolve,reject){
+    if(!gapiReady){reject(new Error("API no lista, esperá un segundo"));return;}
+    var t=gapi.client.getToken();
+    if(t){resolve();return;}
+    tokenClient.callback=function(r){r.error?reject(new Error(r.error)):resolve();};
+    tokenClient.requestAccessToken({prompt:""});
+  });
+}
+function gapiLoaded(){
+  gapi.load("client",function(){
+    gapi.client.init({discoveryDocs:["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"]})
+      .then(function(){gapiReady=true;driveLoad();});
+  });
+}
+function gisLoaded(){
+  tokenClient=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:SCOPES,callback:""});
+}
+
+// ═══════════════════════════════════════
+// PDF
+// ═══════════════════════════════════════
+function exportPDF(){
+  var jsPDF=window.jspdf.jsPDF;
+  var doc=new jsPDF({orientation:"landscape",unit:"mm",format:"a4"});
+  doc.setFillColor(58,56,50);doc.rect(0,0,297,22,"F");
+  doc.setTextColor(237,232,223);doc.setFontSize(14);doc.setFont("helvetica","bold");
+  doc.text("ATR STUDIO — Cómputo de Materiales Durlock",14,10);
+  doc.setFontSize(9);doc.setFont("helvetica","normal");
+  var obra=el("obraName").value||"Sin nombre";
+  doc.text("Obra: "+obra+"   |   Fecha: "+(el("obraFecha").value||"—"),14,17);
+  var rows=[];
+  document.querySelectorAll("#tbody-resumen tr:not(.total-row)").forEach(function(tr){
+    var cells=tr.querySelectorAll("td");
+    if(cells.length>=5) rows.push([cells[0].textContent,cells[1].textContent,cells[2].textContent,cells[3].textContent,cells[4].textContent]);
+  });
+  doc.autoTable({startY:28,head:[["Material","Unidad","Cantidad","P. Unitario","Total $"]],body:rows,
+    theme:"grid",headStyles:{fillColor:[46,77,138],textColor:255,fontSize:9,fontStyle:"bold"},
+    bodyStyles:{fontSize:9},alternateRowStyles:{fillColor:[248,246,242]},
+    columnStyles:{0:{cellWidth:80},2:{halign:"center"},3:{halign:"right"},4:{halign:"right",fontStyle:"bold"}}});
+  var ty=doc.lastAutoTable.finalY+6, total=el("totalAmount").textContent;
+  doc.setFillColor(58,56,50);doc.rect(14,ty,269,10,"F");
+  doc.setTextColor(255,255,255);doc.setFontSize(11);doc.setFont("helvetica","bold");
+  doc.text("TOTAL ESTIMADO",20,ty+7);doc.text(total,283,ty+7,{align:"right"});
+  doc.save("ATR_Durlock_"+obra.replace(/\s+/g,"_")+".pdf");
+  showToast("PDF exportado ✓");
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+document.addEventListener("DOMContentLoaded",function(){
+  el("obraFecha").value=new Date().toISOString().split("T")[0];
+  initTablas(); initPrecios(); calcularTodo(); renderDash();
+});
+</script>
+<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+</body>
+</html>
